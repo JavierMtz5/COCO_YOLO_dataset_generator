@@ -6,7 +6,6 @@ from tqdm import tqdm
 import shutil
 
 
-
 class COCOConverter:
 
     def __init__(self):
@@ -60,9 +59,12 @@ class COCOConverter:
             # Get unique image IDs with/out target classes
             unique_images_with_target_classes = self.extract_images_id(coco_data=coco_data,
                                                                        extract_target_images=True)
-            unique_images_without_target_classes = self.extract_images_id(coco_data=coco_data,
-                                                                          extract_target_images=False,
-                                                                          num_img_with_target_classes=len(unique_images_with_target_classes))
+            if self.background_percentage > 0.0:
+                unique_images_without_target_classes = self.extract_images_id(coco_data=coco_data,
+                                                                            extract_target_images=False,
+                                                                            num_img_with_target_classes=len(unique_images_with_target_classes))
+            else:
+                unique_images_without_target_classes = set()
 
             # Initialize record lists
             images_record, labels_record = list(), list()
@@ -109,7 +111,7 @@ class COCOConverter:
             
             # If the category of the annotation is a target one, include the annotation in YOLOv8 format
             if category_name in self.target_classes:
-                category_id = self.target_classes.index(category_name) if self.create_single_class else 0
+                category_id = self.target_classes.index(category_name) if not self.create_single_class else 0
                 # COCO format: (x, y, width, height)
                 bbox = ann['bbox']
                 x_center = bbox[0] + bbox[2] / 2
@@ -179,7 +181,11 @@ class COCOConverter:
                 shutil.copy(img_path, os.path.join(self.output_dir, dataset_type, 'images'))
                 images_record.append(os.path.join(dataset_type, 'images', img_info['file_name'])) # Record image filename
 
-                if not is_background:
+                if is_background:
+                    # If it is a background image, no target class is present
+                    label_content = ''
+
+                else:
                     # Convert annotations to YOLOv8 or COCO format
                     annotations = [ann for ann in coco_data.get('annotations', []) if ann['image_id'] == img_id]
                     if self.convert_to_yolo:
@@ -205,40 +211,45 @@ class COCOConverter:
 
         # Add arguments
         parser.add_argument('dataset_dir', type=str, help='Path to the directory where COCO dataset is located.')
-        parser.add_argument('output_dir', type=str, help='Name of the directory where the new dataset will be generated.')
-        parser.add_argument('target_classes', type=list, help='Array of strings,where each string is the name of the '
-                                                            'class whose images that must be extracted from the original COCO dataset.')
-        parser.add_argument('background_percentage', type=float, help='Only applies if some classes are being extracted from COCO dataset. '
+        parser.add_argument('--output_dir', type=str, default='new_dataset', help='Name of the directory where the new dataset will be generated.')
+        # parser.add_argument('--target_classes', type=list, help='')
+        parser.add_argument('--target_classes', '--names-list', nargs='+', default=[], help='Array of strings,where each string is the name of the '
+                                                                                            'class whose images that must be extracted from the original COCO dataset.')
+        parser.add_argument('--background_percentage', type=float, default=0.0, help='Only applies if some classes are being extracted from COCO dataset. '
                             'The new dataset will include <background_percentage>% more images, which will not contain any of the target classes.')
-        parser.add_argument('test_num_images', type=int, help='Number of test images from the original COCO dataset to include in the new dataset.')
-        parser.add_argument('test_exclude_classes', type=bool, help='Boolean indicating whether to include images with the target classes or any image.')
-        parser.add_argument('create_single_class', type=bool, help='Boolean indicating whether to join all the selected classes into a single class. Defaults to True')
-        parser.add_argument('single_class_name', type=str, help='Only applies if create_single_class param is set to True. Name of the single class to be generated.')
-        parser.add_argument('convert_to_yolo', type=bool, help='Boolean indicating whether to convert the annotations to YOLOv8 or not.')
+        parser.add_argument('--test_num_images', type=int, help='Number of test images from the original COCO dataset to include in the new dataset.')
+        parser.add_argument('--test_exclude_classes', type=bool, default=True, help='Boolean indicating whether to include images with the target classes or any image.')
+        parser.add_argument('--create_single_class', type=bool, default=False, help='Boolean indicating whether to join all the selected classes into a single class. Defaults to True.')
+        parser.add_argument('--single_class_name', type=str, default='new_class', help='Only applies if create_single_class param is set to True. Name of the single class to be generated.')
+        parser.add_argument('--convert_to_yolo', type=bool, default=True, help='Boolean indicating whether to convert the annotations to YOLOv8 or not.')
 
         # Parse the command line arguments
         args = parser.parse_args()
 
         print('PARAMETERS =================================================================================')
-        print(f"Dataset Directory: {args.arg1}")
-        print(f"Output Directory: {args.arg2}")
-        print(f"Target Classes: {args.arg3}")
-        print(f"Background Percentage: {args.arg4}")
-        print(f"Test Number of Images: {args.arg5}")
-        print(f"Test Exclude Classes: {args.arg6}")
-        print(f"Create Single Class: {args.arg7}")
-        print(f"Single Class Name: {args.arg8}")
-        print(f"Convert to YOLO: {args.arg9}")
+        print(f"Dataset Directory: {args.dataset_dir}")
+        print(f"Output Directory: {args.output_dir}")
+        print(f"Target Classes: {args.target_classes}")
+        print(f"Background Percentage: {args.background_percentage}")
+        print(f"Test Number of Images: {args.test_num_images}")
+        print(f"Test Exclude Classes: {args.test_exclude_classes}")
+        print(f"Create Single Class: {args.create_single_class}")
+        print(f"Single Class Name: {args.single_class_name}")
+        print(f"Convert to YOLO: {args.convert_to_yolo}")
 
-        self.coco_annotation_train = os.path.join(args.arg1, 'annotations', 'instances_train2017.json')
-        self.coco_image_dir_train = os.path.join(args.arg1, 'images', 'train2017')
-        self.coco_annotation_val = os.path.join(args.arg1, 'annotations', 'instances_val2017.json')
-        self.coco_image_dir_val = os.path.join(args.arg1, 'images', 'val2017')
-        self.output_dir = args.arg2
-        self.target_classes = args.arg3
-        self.background_percentage = args.arg4
-        self.test_num_images = args.arg5
-        self.test_exclude_classes = args.arg6
-        self.create_single_class = args.arg7
-        self.single_class_name = args.arg8
-        self.convert_to_yolo = args.arg9
+        self.coco_annotation_train = os.path.join(args.dataset_dir, 'annotations', 'instances_train2017.json')
+        self.coco_image_dir_train = os.path.join(args.dataset_dir, 'images', 'train2017')
+        self.coco_annotation_val = os.path.join(args.dataset_dir, 'annotations', 'instances_val2017.json')
+        self.coco_image_dir_val = os.path.join(args.dataset_dir, 'images', 'val2017')
+        self.output_dir = args.output_dir
+        self.target_classes = args.target_classes
+        self.background_percentage = args.background_percentage
+        self.test_num_images = args.test_num_images
+        self.test_exclude_classes = args.test_exclude_classes
+        self.create_single_class = args.create_single_class
+        self.single_class_name = args.single_class_name
+        self.convert_to_yolo = args.convert_to_yolo
+
+
+if __name__ == '__main__':
+    COCOConverter()
