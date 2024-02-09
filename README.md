@@ -8,18 +8,18 @@ The script expects to have the COCO format dataset at the same level as COCO_dat
 
 - dataset_directory_name
     - annotations
-        - instances_train2017.json
-        - instances_val2017.json
+        - instances_train.json
+        - instances_val.json
     - images
-        - train2017
+        - train
             - image_00001.jpg
             - image_00002.jpg
             - ...
-        - val2017
+        - val
             - image_00100.jpg
             - image_00101.jpg
             - ...
-        - test2017
+        - test
             - image_00201.jpg
             - image_00202.jpg
             - ...

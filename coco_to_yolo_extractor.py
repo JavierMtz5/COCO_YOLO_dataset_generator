@@ -386,12 +386,12 @@ class COCOConverter:
         print(f"Single Class Name: {args.single_class_name}")
         print(f"Convert to YOLO: {args.convert_to_yolo}")
 
-        self.coco_annotation_train = os.path.join(args.dataset_dir, 'annotations', 'instances_train2017.json')
-        self.coco_image_dir_train = os.path.join(args.dataset_dir, 'images', 'train2017')
-        self.coco_annotation_val = os.path.join(args.dataset_dir, 'annotations', 'instances_val2017.json')
-        self.coco_image_dir_val = os.path.join(args.dataset_dir, 'images', 'val2017')
-        self.coco_annotation_test = os.path.join(args.dataset_dir, 'annotations', 'instances_test2017.json')
-        self.coco_image_dir_test = os.path.join(args.dataset_dir, 'images', 'test2017')
+        self.coco_annotation_train = os.path.join(args.dataset_dir, 'annotations', 'instances_train.json')
+        self.coco_image_dir_train = os.path.join(args.dataset_dir, 'images', 'train')
+        self.coco_annotation_val = os.path.join(args.dataset_dir, 'annotations', 'instances_val.json')
+        self.coco_image_dir_val = os.path.join(args.dataset_dir, 'images', 'val')
+        self.coco_annotation_test = os.path.join(args.dataset_dir, 'annotations', 'instances_test.json')
+        self.coco_image_dir_test = os.path.join(args.dataset_dir, 'images', 'test')
         self.output_dir = args.output_dir
         self.target_classes = args.target_classes
         self.background_percentage = args.background_percentage
