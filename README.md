@@ -42,6 +42,16 @@ It is not mandatory to have the original COCO dataset, but any other COCO format
 
 ## Usage
 
+### Dependencies
+
+Install the required dependencies by running the following command from the *COCO_YOLO_dataset_generator* directory:
+
+```bash
+$ pip install -r requirements. txt
+```
+
+### Execution
+
 - The usage of the script includes different possibilities and features. To extract the desired dataset, many of the parameters above must be correctly defined.
 
 - The *dataset_dir* parameter is the only mandatory parameter. It must be the name of the directory where the original dataset with COCO format is located.
