@@ -1,6 +1,6 @@
 # COCO-YOLO Dataset Generator v0.1.0
 
-![COCO-YOLOv8 cnoverter](assets/coco_yolo_extractor.jpg)
+![COCO-YOLOv8 converter](assets/coco_yolo_extractor.png)
 
 ## Dataset structure
 
