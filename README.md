@@ -1,5 +1,7 @@
 # COCO-YOLO Dataset Generator v0.1.0
 
+![alt text](https://github.com/JavierMtz5/COCO_YOLO_dataset_generator/blob/main/coco_yolo_extractor.jpg?raw=true)
+
 ## Dataset structure
 
 The script expects to have the COCO format dataset at the same level as COCO_dataset_extractor, following this structure:
@@ -30,13 +32,13 @@ It is not mandatory to have the original COCO dataset, but any other COCO format
 
 - **dataset_dir**: Path to the directory where COCO dataset is located.
 - **output_dir**: Name of the directory where the new dataset will be generated. Defaults to *new_dataset*.
-- **target_classes**: Array of strings, where each string is the name of the class whose images that must be extracted from the original COCO dataset. If not specified, all classes are extracted from the original dataset. <span style="color:red">**MUST ENUMERATE ALL THE CLASSES REQUIRED, IT CANNOT BE LEFT EMPTY**</span>
+- **target_classes**: Array of strings, where each string is the name of the class whose images that must be extracted from the original COCO dataset. If not specified, all classes are extracted from the original dataset.
 - **background_percentage**: Only applies if not all classes are being extracted from COCO dataset. The new dataset will include *background_percentage*% more images, which will be background and will not contain any of the target classes. Defaults to 0.0.
-- **test_num_images**: Number of test images from the original COCO dataset to include in the new dataset. Defaults to None, which means that all of the original test images will be included. <span style="color:red">**IN FUTURE VERSION**</span>
-- **test_exclude_classes**: Boolean indicating whether to include images which contain the target classes or any image. Defaults to True. <span style="color:red">**IN FUTURE VERSION**</span>
 - **create_single_class**: Boolean indicating whether to join all the selected classes into a single class. Defaults to False.
 - **single_class_name**: Only applies if create_single_class param is set to True. Name of the single class to be generated. Defaults to *new_class*.
-- **convert_to_yolo**: Boolean indicating whether to convert the annotations to YOLOv8 or not. Defaults to True. <span style="color:red">**COCO-COCO NOT AVAILABLE YET**</span>
+- **test_num_images**: Number of test images from the original COCO dataset to include in the new dataset. Defaults to None, which means that all of the original test images will be included.
+- **test_only_target_classes** (**AVAILABLE IN FUTURE RELEASE**): Boolean indicating whether to only include images which contain the target classes or any image. Defaults to False.
+- **convert_to_yolo** (**AVAILABLE IN FUTURE RELEASE**): Boolean indicating whether to convert the annotations to YOLOv8 or not. Defaults to True.
 
 ## Usage
 
@@ -50,25 +52,25 @@ It is not mandatory to have the original COCO dataset, but any other COCO format
 
 If you want to give a name to the directory which will contain the new dataset, set the *output_dir* parameter with the desired name. Do not use spaces.
 
-#### Do I want to extract only images with objects belonging to certain classes, or all images?
+#### Do I want to extract only images containing objects that belong to certain classes, or all the images of the original dataset?
 
-If you want to extract only images which contain objects from certain classes, you must set the *target_classes* parameter with an array of strings, which are the names of the classes you want to keep. If, instead of loading 118K images with all different objects, you only want to load images which contain dogs and cats, then *target_classes* parameter shuould be set to ```--target_classes cat dog```.
+If you want to extract only images which contain objects from certain classes, you must set the *target_classes* parameter with an array of strings, which are the names of the classes you want to keep. For example, if instead of loading 118K images with all different objects, you only want to load images which contain dogs and cats, then *target_classes* parameter shuould be set to ```--target_classes cat dog```.
 
 If you want to extract all the original images, do not set a value for the *target_classes* parameter.
 
 #### Do you want to include background images in the new dataset?
 
-If you gave a value to the *target_classes* parameter, the new dataset will now contain only images with the target classes, which can lead to an increase in false positives. To solve this problem, a common solution is to add images which do not contain any of the target classes to the dataset. Parameter *background_percentange* sets how many background images will be added to the new dataset. More specifically, the number of background images to be added is equal to the length of the non-background new dataset multiplied by the *background_percentage* parameter, which must be a value between 0 and 1.
+If you gave a value to the *target_classes* parameter, the new dataset will now contain only images with the target classes, which can lead to an increase in false positives. To solve this problem, a common solution is to add images which do not contain any of the target classes to the dataset. Parameter *background_percentange* sets how many background images will be added to the new dataset. More specifically, the number of background images to be added is equal to the length of the new dataset (without background images) multiplied by the *background_percentage* parameter, which must be a value between 0 and 1.
 
 If the length of the new dataset is 1000, and I set the *background_percentage* parameter to 0.2, then I will add 200 background images to the new dataset. If the *background_percentage* parameter is not set, then no background images will be added.
 
-#### How many images from the original dataset do you want to include in the new dataset?
+#### How many test images from the original dataset do you want to include in the new test dataset?
 
-If, instead of 100K test images you only want to extract 500 test images, then *test_num_images* parameter must be set to 500. If not set, all original test images will be included in the new dataset.
+If, instead of 100K test images you only want to extract 500 test images, then *test_num_images* parameter must be set to 500. If not set, all original test images will be included in the new test set.
 
 #### Do you want to extract only the test images which contain the target classes?
 
-If you want to extract only images containing object that belong to the target classes, then *test_exclude_classes* must be set to False. If *test_exclude_classes* parameter is not set, then all original test images will be extracted.
+If you want to extract only images containing objects that belong to the target classes, then *test_exclude_classes* must be set to False. If *test_exclude_classes* parameter is not set, then all original test images, independently of the objects they contain, will be extracted.
 
 #### Do you want to join all the classes of the new dataset into one single class?
 
@@ -82,14 +84,32 @@ If you want the new dataset to be YOLOv8 format, then you must set *convert_to_y
 
 ### Usage example
 
-1. #### Convert COCO format dataset to YOLOv8 format, extracting only images containing 'dog' and 'cat' classes from the original dataset
+1. ##### Convert COCO format dataset to YOLOv8 format, extracting all the original images and annotations. Extract all original test images.
+
+```bash
+$ python3 coco_to_yolo_extractor.py coco_dataset_directory --convert_to_yolo true --output_dir new_dataset_directory
+```
+
+2. ##### Convert COCO format dataset to YOLOv8 format, extracting only images containing 'dog' and 'cat' classes from the original dataset. Extract all original test images.
 
 ```bash
 $ python3 coco_to_yolo_extractor.py coco_dataset_directory --convert_to_yolo true --target_classes dog cat --output_dir new_dataset_directory
 ```
 
-2. #### Convert COCO format dataset to YOLOv8 format, first extracting only images containing 'dog' and 'cat' classes, and remapping all 'dog' and 'cat' annotations to a single class 'animals'
+3. ##### Convert COCO format dataset to YOLOv8 format, first extracting only images containing 'dog' and 'cat' classes, and remapping all 'dog' and 'cat' annotations to a single class 'animals'. Extract all original test images.
 
 ```bash
 $ python3 coco_to_yolo_extractor.py coco_dataset_directory --convert_to_yolo true --target_classes dog cat --create_single_class true --single_class_name animals --output_dir new_dataset_directory
+```
+
+4. ##### Convert COCO format dataset to YOLOv8 format, first extracting only images containing 'dog' and 'cat' classes, and remapping all 'dog' and 'cat' annotations to a single class 'animals'. Add 20% of background images (images which do not contain any of the target classes) to the new dataset. Extract all original test images.
+
+```bash
+$ python3 coco_to_yolo_extractor.py coco_dataset_directory --convert_to_yolo true --target_classes dog cat --background_percentage 0.2 --create_single_class true --single_class_name animals --output_dir new_dataset_directory
+```
+
+5. ##### Convert COCO format dataset to YOLOv8 format, first extracting only images containing 'dog' and 'cat' classes, and remapping all 'dog' and 'cat' annotations to a single class 'animals'. Add 20% of background images (images which do not contain any of the target classes) to the new dataset. Only 1000 images from the original test set will be extracted.
+
+```bash
+$ python3 coco_to_yolo_extractor.py coco_dataset_directory --convert_to_yolo true --target_classes dog cat --background_percentage 0.2 --create_single_class true --single_class_name animals --output_dir new_dataset_directory --test_num_images 1000
 ```
