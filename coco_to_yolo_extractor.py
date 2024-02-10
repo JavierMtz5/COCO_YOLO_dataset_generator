@@ -35,6 +35,9 @@ class COCOConverter:
         self.process_dataset('test',
                              self.coco_annotation_test,
                              self.coco_image_dir_test)
+        
+        if self.convert_to_yolo:
+            self.create_data_yaml()
 
     def process_dataset(self,
                         dataset_type: str,
@@ -134,6 +137,9 @@ class COCOConverter:
         # Create a new category for the single class if required
         if single_class_name:
             self.create_new_class()
+
+        # Set the necessary data for creating the data YAML file
+        self.set_classes_num_and_name()
 
         # Get unique image IDs with/out target classes if required
         unique_images_with_target_classes, unique_images_without_target_classes = set(), set()
@@ -350,6 +356,16 @@ class COCOConverter:
             }
             self.coco_data.setdefault('categories', []).append(new_category)
 
+    def create_data_yaml(self):
+        """Creates the data YAML file required to run a training on the YOLOv8 arquitecture with ultralytics"""
+        with open(os.path.join(self.output_dir, 'data.yaml')) as f:
+            data_yaml = 'train: ../train/images\n' \
+                        'val: ../valid/images\n' \
+                        'test: ../test/images\n\n' \
+                        f'nc: {self.num_classes}\n' \
+                        f'names: {self.class_names}'
+            f.write(data_yaml)
+
     def parse_arguments(self) -> argparse.Namespace:
         """
         Parses the arguments received from the user and sets this values as class attributes.
@@ -401,6 +417,18 @@ class COCOConverter:
         self.single_class_name = args.single_class_name
         self.convert_to_yolo = args.convert_to_yolo
 
+    def set_classes_num_and_name(self) -> None:
+        """Sets the number of classes and the names of the classes on the new dataset"""
+        if self.target_classes and self.create_single_class:
+            self.num_classes = 1
+            self.class_names = [self.single_class_name]
+        elif self.target_classes:
+            self.num_classes = len(self.target_classes)
+            self.class_names = self.target_classes
+        else:
+            self.num_classes = len(self.coco_data.get('categories', []))
+            self.class_names = [category_info.get('name') for category_info in self.coco_data.get('categories', [])]
+    
     @staticmethod
     def serialize(obj):
         if isinstance(obj, (set,)):

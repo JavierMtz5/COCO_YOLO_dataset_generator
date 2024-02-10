@@ -1,15 +1,23 @@
-# COCO-YOLO Class Extractor and Dataset Generator
+# COCO - YOLO Class Extractor and Dataset Generator
 
 ![COCO-YOLOv8 converter](assets/coco_yolo.png)
 
+The script allows the user to:
+- Convert datasets from COCO JSON format to YOLOv5 PyTorch TXT format
+- Create a dataset from an original one, containing only certain classes and its annotations
+- Create a dataset from an original one, combining certain classes into a single one
+- Adding background images when creating datasets with certain classes
+- Extract only a certain number of test images into the new dataset
+
 ## Dataset structure
 
-The script expects to have the COCO format dataset inside the  COCO_dataset_extractor directory, following this structure:
+The script expects to have the COCO JSON format dataset inside the COCO_dataset_extractor directory, following this structure:
 
 - dataset_directory_name
     - annotations
         - instances_train.json
         - instances_val.json
+        - instances_test.json
     - images
         - train
             - image_00001.jpg
@@ -26,19 +34,19 @@ The script expects to have the COCO format dataset inside the  COCO_dataset_extr
 
 Image filenames do not have to be in order nor named in the same way, and the main directory (*dataset_directory_name* in the diagram above) containing the dataset can be named by the user. The remaining directories must be named in the same way.
 
-It is not mandatory to have the original COCO dataset, but any other COCO format dataset must follow this structure so that the script can correctly convert the data.
+It is not mandatory to have the original COCO dataset, but any other COCO JSON format dataset must follow this structure so that the script can correctly convert the data.
 
 ## Arguments
 
-- **dataset_dir**: Path to the directory where COCO dataset is located.
+- **dataset_dir**: Path to the directory where COCO JSON dataset is located.
 - **output_dir**: Name of the directory where the new dataset will be generated. Defaults to *new_dataset*.
-- **target_classes**: Array of strings, where each string is the name of the class whose images that must be extracted from the original COCO dataset. If not specified, all classes are extracted from the original dataset.
-- **background_percentage**: Only applies if not all classes are being extracted from COCO dataset. The new dataset will include *background_percentage*% more images, which will be background and will not contain any of the target classes. Defaults to 0.0.
+- **target_classes**: Array of strings, where each string is the name of the class whose images that must be extracted from the original COCO JSON  dataset. If not specified, all classes are extracted from the original dataset.
+- **background_percentage**: Only applies if not all classes are being extracted from COCO JSON dataset. The new dataset will include *background_percentage*% more images, which will be background and will not contain any of the target classes. Defaults to 0.0.
 - **create_single_class**: Boolean indicating whether to join all the selected classes into a single class. Defaults to False.
 - **single_class_name**: Only applies if create_single_class param is set to True. Name of the single class to be generated. Defaults to *new_class*.
-- **test_num_images**: Number of test images from the original COCO dataset to include in the new dataset. Defaults to None, which means that all of the original test images will be included.
+- **test_num_images**: Number of test images from the original COCO JSON dataset to include in the new dataset. Defaults to None, which means that all of the original test images will be included.
 - **test_only_target_classes** (**AVAILABLE IN FUTURE RELEASE**): Boolean indicating whether to only include images which contain the target classes or any image. Defaults to False.
-- **convert_to_yolo** (**AVAILABLE IN FUTURE RELEASE**): Boolean indicating whether to convert the annotations to YOLOv8 or not. Defaults to True.
+- **convert_to_yolo** (**AVAILABLE IN FUTURE RELEASE**): Boolean indicating whether to convert the annotations to YOLO or not. Defaults to True.
 
 ## Usage
 
@@ -54,7 +62,7 @@ pip install -r requirements.txt
 
 - The usage of the script includes different possibilities and features. To extract the desired dataset, many of the parameters above must be correctly defined.
 
-- The *dataset_dir* parameter is the only mandatory parameter. It must be the name of the directory where the original dataset with COCO format is located.
+- The *dataset_dir* parameter is the only mandatory parameter. It must be the name of the directory where the original dataset with COCO JSON format is located.
 
 - For the remaining parameters, to know which ones you must set, read each of the questions below and set the corresponding parameter if it applies:
 
@@ -94,32 +102,32 @@ If you want the new dataset to be YOLOv8 format, then you must set *convert_to_y
 
 ### Usage example
 
-1. ##### Convert COCO format dataset to YOLOv8 format, extracting all the original images and annotations. Extract all original test images.
+1. ##### Convert COCO JSON format dataset to YOLOv5 PyTorch TXT format, extracting all the original images and annotations. Extract all original test images.
 
 ```bash
-$ python3 coco_to_yolo_extractor.py coco_dataset_directory --convert_to_yolo true --output_dir new_dataset_directory
+python3 coco_to_yolo_extractor.py coco_dataset_directory --convert_to_yolo true --output_dir new_dataset_directory
 ```
 
-2. ##### Convert COCO format dataset to YOLOv8 format, extracting only images containing 'dog' and 'cat' classes from the original dataset. Extract all original test images.
+2. ##### Convert COCO JSON format dataset to YOLOv5 PyTorch TXT format, extracting only images containing 'dog' and 'cat' classes from the original dataset. Extract all original test images.
 
 ```bash
-$ python3 coco_to_yolo_extractor.py coco_dataset_directory --convert_to_yolo true --target_classes dog cat --output_dir new_dataset_directory
+python3 coco_to_yolo_extractor.py coco_dataset_directory --convert_to_yolo true --target_classes dog cat --output_dir new_dataset_directory
 ```
 
-3. ##### Convert COCO format dataset to YOLOv8 format, first extracting only images containing 'dog' and 'cat' classes, and remapping all 'dog' and 'cat' annotations to a single class 'animals'. Extract all original test images.
+3. ##### Convert COCO JSON format dataset to YOLOv5 PyTorch TXT format, first extracting only images containing 'dog' and 'cat' classes, and remapping all 'dog' and 'cat' annotations to a single class 'animals'. Extract all original test images.
 
 ```bash
-$ python3 coco_to_yolo_extractor.py coco_dataset_directory --convert_to_yolo true --target_classes dog cat --create_single_class true --single_class_name animals --output_dir new_dataset_directory
+python3 coco_to_yolo_extractor.py coco_dataset_directory --convert_to_yolo true --target_classes dog cat --create_single_class true --single_class_name animals --output_dir new_dataset_directory
 ```
 
-4. ##### Convert COCO format dataset to YOLOv8 format, first extracting only images containing 'dog' and 'cat' classes, and remapping all 'dog' and 'cat' annotations to a single class 'animals'. Add 20% of background images (images which do not contain any of the target classes) to the new dataset. Extract all original test images.
+4. ##### Convert COCO JSON format dataset to YOLOv5 PyTorch TXT format, first extracting only images containing 'dog' and 'cat' classes, and remapping all 'dog' and 'cat' annotations to a single class 'animals'. Add 20% of background images (images which do not contain any of the target classes) to the new dataset. Extract all original test images.
 
 ```bash
-$ python3 coco_to_yolo_extractor.py coco_dataset_directory --convert_to_yolo true --target_classes dog cat --background_percentage 0.2 --create_single_class true --single_class_name animals --output_dir new_dataset_directory
+python3 coco_to_yolo_extractor.py coco_dataset_directory --convert_to_yolo true --target_classes dog cat --background_percentage 0.2 --create_single_class true --single_class_name animals --output_dir new_dataset_directory
 ```
 
-5. ##### Convert COCO format dataset to YOLOv8 format, first extracting only images containing 'dog' and 'cat' classes, and remapping all 'dog' and 'cat' annotations to a single class 'animals'. Add 20% of background images (images which do not contain any of the target classes) to the new dataset. Only 1000 images from the original test set will be extracted.
+5. ##### Convert COCO JSON format dataset to YOLOv5 PyTorch TXT format, first extracting only images containing 'dog' and 'cat' classes, and remapping all 'dog' and 'cat' annotations to a single class 'animals'. Add 20% of background images (images which do not contain any of the target classes) to the new dataset. Only 1000 images from the original test set will be extracted.
 
 ```bash
-$ python3 coco_to_yolo_extractor.py coco_dataset_directory --convert_to_yolo true --target_classes dog cat --background_percentage 0.2 --create_single_class true --single_class_name animals --output_dir new_dataset_directory --test_num_images 1000
+python3 coco_to_yolo_extractor.py coco_dataset_directory --convert_to_yolo true --target_classes dog cat --background_percentage 0.2 --create_single_class true --single_class_name animals --output_dir new_dataset_directory --test_num_images 1000
 ```
