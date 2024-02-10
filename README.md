@@ -1,10 +1,10 @@
-# COCO-YOLO Dataset Generator v0.1.0
+# COCO-YOLO Class Extractor and Dataset Generator
 
 ![COCO-YOLOv8 converter](assets/coco_yolo.png)
 
 ## Dataset structure
 
-The script expects to have the COCO format dataset at the same level as COCO_dataset_extractor, following this structure:
+The script expects to have the COCO format dataset inside the  COCO_dataset_extractor directory, following this structure:
 
 - dataset_directory_name
     - annotations
@@ -47,7 +47,7 @@ It is not mandatory to have the original COCO dataset, but any other COCO format
 Install the required dependencies by running the following command from the *COCO_YOLO_dataset_generator* directory:
 
 ```bash
-$ pip install -r requirements. txt
+pip install -r requirements.txt
 ```
 
 ### Execution

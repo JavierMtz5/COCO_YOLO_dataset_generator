@@ -174,7 +174,7 @@ class COCOConverter:
         with open(os.path.join(self.output_dir, f'{dataset_type}.txt'), 'w') as dataset_list:
             dataset_list.write('\n'.join(images_record))
 
-        print(f'{dataset_type.capitalize()} images and label data successfully stored in {os.path.join(self.output_dir, f"{dataset_type}.txt")}. Total images: {len(images_record)}')
+        print(f'{dataset_type.capitalize()} images record successfully stored in {os.path.join(self.output_dir, f"{dataset_type}.txt")}. Total images: {len(images_record)}')
 
 
     def convert_and_save_annotations_and_img(self,
