@@ -144,13 +144,19 @@ class COCOConverter:
         # Get unique image IDs with/out target classes if required
         unique_images_with_target_classes, unique_images_without_target_classes = set(), set()
         if self.target_classes:
+            print(f'Extracting image IDs for images containing {self.target_classes} classes')
             unique_images_with_target_classes, _ = self.extract_images_id_and_filenames(extract_target_images=True)
+            print('Image ID extraction completed successfully')
             if self.background_percentage > 0.0:
+                print(f'Extracting image IDs for background images not containing {self.target_classes} classes')
                 unique_images_without_target_classes, _ = self.extract_images_id_and_filenames(extract_target_images=False,
                                                                               num_img_with_target_classes=len(unique_images_with_target_classes))
+                print('Background image ID extraction completed successfully')
 
         else:
+            print(f'Extracting image IDs for all images')
             unique_images_with_target_classes, _ = self.extract_images_id_and_filenames(extract_all=True)
+            print('Image ID extraction completed successfully')
 
 
         # Initialize record lists
@@ -323,7 +329,7 @@ class COCOConverter:
                    set([image_info['file_name'] for image_info in self.coco_data['images']])
 
         # Iterate through annotations to search for target/non-target images
-        for ann in self.coco_data.get('annotations', []):
+        for ann in tqdm(self.coco_data.get('annotations', [])):
             category_id = ann['category_id']
             category_name = next((cat['name'] for cat in self.coco_data.get('categories', []) if cat['id'] == category_id), None)
             
@@ -333,7 +339,7 @@ class COCOConverter:
 
                 # Add ID to set
                 unique_images_id.add(image_id)
-                # Add filename toset
+                # Add filename to set
                 result_dict = next((img_data for img_data in self.coco_data['images'] if img_data['id'] == image_id), None)
                 unique_images_filenames.add(result_dict['file_name'])
 
